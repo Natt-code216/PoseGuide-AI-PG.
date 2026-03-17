@@ -4,6 +4,9 @@ import '../providers/auth_provider.dart';
 import '../models/pose_model.dart';
 import '../data/mock_poses.dart';
 import 'login_screen.dart';
+import 'edit_profile_screen.dart';
+import 'membership_screen.dart';
+import 'settings_screen.dart';
 
 class UserProfileScreen extends StatefulWidget {
   const UserProfileScreen({super.key});
@@ -23,11 +26,11 @@ class _UserProfileScreenState extends State<UserProfileScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 2, vsync: this);
 
     // Initialize mock data
-    _favorites = mockPoses.take(5).toList(); // First 5 poses as favorites
-    _history = mockPoses.skip(2).take(5).toList(); // Poses 3-7 as history
+    _favorites = mockPoses.take(5).toList();
+    _history = mockPoses.skip(2).take(5).toList();
   }
 
   @override
@@ -54,82 +57,74 @@ class _UserProfileScreenState extends State<UserProfileScreen>
   /// 未登录视图
   Widget _buildNotLoggedInView() {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.deepPurple, Colors.purpleAccent],
-          ),
-        ),
-        child: SafeArea(
-          child: Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const CircleAvatar(
-                  radius: 60,
-                  backgroundColor: Colors.white24,
-                  child: Icon(
-                    Icons.person,
-                    size: 60,
-                    color: Colors.white,
+      backgroundColor: const Color(0xFFF3E5F5),
+      body: SafeArea(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const CircleAvatar(
+                radius: 60,
+                backgroundColor: Color(0xFF7B1FA2),
+                child: Icon(
+                  Icons.person,
+                  size: 60,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 24),
+              const Text(
+                '登录后可享受更多功能',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFF7B1FA2),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                '登录账号同步收藏和历史记录',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[600],
+                ),
+              ),
+              const SizedBox(height: 40),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const LoginScreen()),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF7B1FA2),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 48,
+                    vertical: 16,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(30),
                   ),
                 ),
-                const SizedBox(height: 24),
-                const Text(
-                  '登录后可享受更多功能',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+                child: const Text(
+                  '去登录',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
-                const SizedBox(height: 12),
-                const Text(
-                  '登录账号同步收藏和历史记录',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.white70,
-                  ),
+              ),
+              const SizedBox(height: 16),
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const LoginScreen()),
+                  );
+                },
+                child: const Text(
+                  '还没有账号？立即注册',
+                  style: TextStyle(color: Color(0xFF7B1FA2)),
                 ),
-                const SizedBox(height: 40),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const LoginScreen()),
-                    );
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.deepPurple,
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 48,
-                      vertical: 16,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(30),
-                    ),
-                  ),
-                  child: const Text(
-                    '去登录',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const LoginScreen()),
-                    );
-                  },
-                  child: const Text(
-                    '还没有账号？立即注册',
-                    style: TextStyle(color: Colors.white70),
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -138,96 +133,19 @@ class _UserProfileScreenState extends State<UserProfileScreen>
 
   /// 已登录视图
   Widget _buildLoggedInView(dynamic auth) {
+    final user = auth.currentUser;
+    final isVip = user?.isVip ?? false;
+
     return Scaffold(
+      backgroundColor: const Color(0xFFF3E5F5),
       body: NestedScrollView(
         headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
           return <Widget>[
-            SliverAppBar(
-              expandedHeight: 250.0,
-              floating: false,
-              pinned: true,
-              flexibleSpace: FlexibleSpaceBar(
-                centerTitle: true,
-                title: const Text(
-                  '我的',
-                  style: TextStyle(color: Colors.white, fontSize: 16.0),
-                ),
-                background: Container(
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [Colors.deepPurple, Colors.purpleAccent],
-                    ),
-                  ),
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      const DecoratedBox(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment(0.0, -1.0),
-                            end: Alignment(0.0, 1.0),
-                            colors: [Color(0x00FFFFFF), Color(0x00FFFFFF)],
-                          ),
-                        ),
-                      ),
-                      Center(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            CircleAvatar(
-                              radius: 50,
-                              backgroundColor: Colors.white.withOpacity(0.3),
-                              child: auth.currentUser?.avatarUrl != null &&
-                                      auth.currentUser!.avatarUrl.isNotEmpty
-                                  ? ClipOval(
-                                      child: Image.network(
-                                        auth.currentUser!.avatarUrl,
-                                        fit: BoxFit.cover,
-                                        width: 92,
-                                        height: 92,
-                                        errorBuilder:
-                                            (context, error, stackTrace) {
-                                          return const Icon(
-                                            Icons.person,
-                                            size: 40,
-                                            color: Colors.white,
-                                          );
-                                        },
-                                      ),
-                                    )
-                                  : const Icon(
-                                      Icons.person,
-                                      size: 40,
-                                      color: Colors.white,
-                                    ),
-                            ),
-                            const SizedBox(height: 16),
-                            Text(
-                              auth.currentUser?.name ?? '用户名',
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              auth.currentUser?.email ?? '',
-                              style: const TextStyle(
-                                color: Colors.white70,
-                                fontSize: 14,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
+            // 用户信息头部
+            SliverToBoxAdapter(
+              child: _buildUserHeader(user, isVip, auth),
             ),
+            // Tab 栏
             SliverPersistentHeader(
               delegate: _SliverTabBarDelegate(
                 TabBar(
@@ -235,10 +153,9 @@ class _UserProfileScreenState extends State<UserProfileScreen>
                   tabs: const [
                     Tab(text: '收藏'),
                     Tab(text: '历史'),
-                    Tab(text: '设置'),
                   ],
-                  indicatorColor: Colors.deepPurple,
-                  labelColor: Colors.deepPurple,
+                  indicatorColor: const Color(0xFF7B1FA2),
+                  labelColor: const Color(0xFF7B1FA2),
                   unselectedLabelColor: Colors.grey,
                 ),
               ),
@@ -249,12 +166,211 @@ class _UserProfileScreenState extends State<UserProfileScreen>
         body: TabBarView(
           controller: _tabController,
           children: [
-            // Favorites Tab
             _buildTabContent(_favorites, '还没有收藏的姿势', '收藏喜欢的姿势，方便随时查看'),
-            // History Tab
             _buildTabContent(_history, '还没有浏览历史', '浏览过的姿势会在这里显示'),
-            // Settings Tab
-            _buildSettingsContent(auth),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUserHeader(dynamic user, bool isVip, dynamic auth) {
+    return Container(
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [Color(0xFF7B1FA2), Color(0xFFCE93D8)],
+        ),
+      ),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  // 头像
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const EditProfileScreen(),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      width: 70,
+                      height: 70,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white, width: 2),
+                      ),
+                      child: user?.avatarUrl != null &&
+                              user!.avatarUrl.isNotEmpty
+                          ? ClipOval(
+                              child: Image.network(
+                                user.avatarUrl,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return const Icon(
+                                    Icons.person,
+                                    size: 35,
+                                    color: Color(0xFF7B1FA2),
+                                  );
+                                },
+                              ),
+                            )
+                          : const Icon(
+                              Icons.person,
+                              size: 35,
+                              color: Color(0xFF7B1FA2),
+                            ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  // 用户信息
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              user?.name ?? '用户名',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            if (isVip) ...[
+                              const SizedBox(width: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  gradient: const LinearGradient(
+                                    colors: [Color(0xFFFFD700), Color(0xFFFFB300)],
+                                  ),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: const Text(
+                                  'VIP',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          user?.email ?? '',
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // 设置按钮
+                  _buildSettingsButton(auth),
+                ],
+              ),
+              const SizedBox(height: 16),
+              // 会员卡片
+              _buildVipCard(isVip),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSettingsButton(dynamic auth) {
+    return IconButton(
+      icon: const Icon(Icons.settings, color: Colors.white),
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const SettingsScreen()),
+        );
+      },
+    );
+  }
+
+  Widget _buildVipCard(bool isVip) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const MembershipScreen()),
+        );
+      },
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFFFFD700), Color(0xFFFFB300)],
+          ),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Row(
+                    children: [
+                      Icon(Icons.workspace_premium, color: Colors.white, size: 20),
+                      SizedBox(width: 8),
+                      Text(
+                        'VIP 会员',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    isVip ? '尊享专属权益' : '开通会员，解锁全部功能',
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.3),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Text(
+                isVip ? '已开通' : '立即开通',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -271,20 +387,20 @@ class _UserProfileScreenState extends State<UserProfileScreen>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.bookmark_border, size: 80, color: Colors.grey),
+            Icon(Icons.bookmark_border, size: 80, color: Colors.grey[400]),
             const SizedBox(height: 24),
             Text(
               emptyTitle,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
-                color: Colors.grey,
+                color: Colors.grey[600],
               ),
             ),
             const SizedBox(height: 8),
             Text(
               emptySubtitle,
-              style: const TextStyle(fontSize: 14, color: Colors.grey),
+              style: TextStyle(fontSize: 14, color: Colors.grey[500]),
             ),
           ],
         ),
@@ -293,7 +409,6 @@ class _UserProfileScreenState extends State<UserProfileScreen>
 
     return RefreshIndicator(
       onRefresh: () async {
-        // Simulate refresh
         await Future.delayed(const Duration(seconds: 1));
       },
       child: GridView.builder(
@@ -358,108 +473,6 @@ class _UserProfileScreenState extends State<UserProfileScreen>
           );
         },
       ),
-    );
-  }
-
-  Widget _buildSettingsContent(dynamic auth) {
-    return ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        Card(
-          child: ListTile(
-            leading: const Icon(Icons.person, color: Colors.deepPurple),
-            title: const Text('编辑个人资料'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              // Navigate to edit profile screen
-            },
-          ),
-        ),
-        const SizedBox(height: 8),
-        Card(
-          child: ListTile(
-            leading: const Icon(Icons.notifications, color: Colors.deepPurple),
-            title: const Text('通知设置'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              // Navigate to notification settings
-            },
-          ),
-        ),
-        const SizedBox(height: 8),
-        Card(
-          child: ListTile(
-            leading: const Icon(Icons.privacy_tip, color: Colors.deepPurple),
-            title: const Text('隐私政策'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              // Navigate to privacy policy
-            },
-          ),
-        ),
-        const SizedBox(height: 8),
-        Card(
-          child: ListTile(
-            leading: const Icon(Icons.info, color: Colors.deepPurple),
-            title: const Text('关于我们'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () {
-              // Navigate to about us
-            },
-          ),
-        ),
-        const SizedBox(height: 8),
-        Card(
-          child: ListTile(
-            leading: const Icon(Icons.logout, color: Colors.red),
-            title: const Text('退出登录'),
-            textColor: Colors.red,
-            iconColor: Colors.red,
-            onTap: () {
-              _showLogoutDialog(auth);
-            },
-          ),
-        ),
-      ],
-    );
-  }
-
-  void _showLogoutDialog(dynamic auth) {
-    showDialog(
-      context: context,
-      builder: (BuildContext dialogContext) {
-        return AlertDialog(
-          title: const Text('确认退出'),
-          content: const Text('确定要退出当前账号吗？'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(dialogContext).pop();
-              },
-              child: const Text('取消'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                Navigator.of(dialogContext).pop();
-                await auth.logout();
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('已退出登录'),
-                      backgroundColor: Colors.green,
-                    ),
-                  );
-                }
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-              ),
-              child: const Text('退出'),
-            ),
-          ],
-        );
-      },
     );
   }
 }
