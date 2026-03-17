@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../screens/ai_search_screen.dart';
 
 class CustomSearchBar extends StatelessWidget {
   final TextEditingController controller;
@@ -16,36 +17,37 @@ class CustomSearchBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-      child: TextField(
-        controller: controller,
-        decoration: InputDecoration(
-          hintText: hintText,
-          hintStyle: TextStyle(
-            color: Colors.grey[400],
-            fontSize: 14,
-            fontWeight: FontWeight.w400,
-          ),
-          prefixIcon: Container(
-            width: 40,
-            alignment: Alignment.center,
-            child: Icon(
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => const AISearchScreen()),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.7),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          children: [
+            Icon(
               Icons.search_rounded,
               color: Colors.grey[500],
               size: 22,
             ),
-          ),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
-            borderSide: BorderSide.none,
-          ),
-          filled: true,
-          fillColor: Colors.white.withOpacity(0.7),
-          contentPadding: const EdgeInsets.symmetric(vertical: 14),
+            const SizedBox(width: 12),
+            Text(
+              hintText,
+              style: TextStyle(
+                color: Colors.grey[400],
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+          ],
         ),
-        onChanged: onChanged,
-        onSubmitted: onSubmitted,
       ),
     );
   }

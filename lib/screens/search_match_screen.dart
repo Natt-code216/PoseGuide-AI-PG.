@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import '../models/pose_model.dart';
 import '../services/pose_service.dart';
 import '../widgets/pose_card.dart';
-import '../widgets/custom_search_bar.dart';
 
 class SearchMatchScreen extends StatefulWidget {
-  const SearchMatchScreen({super.key});
+  final String? initialQuery;
+
+  const SearchMatchScreen({super.key, this.initialQuery});
 
   @override
   State<SearchMatchScreen> createState() => _SearchMatchScreenState();
@@ -21,6 +22,11 @@ class _SearchMatchScreenState extends State<SearchMatchScreen> {
   @override
   void initState() {
     super.initState();
+    // 如果有初始查询，自动执行搜索
+    if (widget.initialQuery != null && widget.initialQuery!.isNotEmpty) {
+      _searchController.text = widget.initialQuery!;
+      _performSearch(widget.initialQuery!);
+    }
   }
 
   Future<void> _performSearch(String query) async {
@@ -63,61 +69,141 @@ class _SearchMatchScreenState extends State<SearchMatchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [Color(0xFFF3E5F5), Color(0xFFE1BEE7)],
+      ).colors[0],
       appBar: AppBar(
-        title: const Text('搜索姿势'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black87),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          '搜索结果',
+          style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w600),
+        ),
         centerTitle: true,
       ),
       body: Column(
         children: [
-          CustomSearchBar(
-            controller: _searchController,
-            hintText: '输入关键词搜索姿势...',
-            onChanged: (value) {
-              // 实现防抖搜索
-              Future.delayed(const Duration(milliseconds: 500), () {
-                if (_searchController.text == value) {
-                  _performSearch(value);
-                }
-              });
-            },
-            onSubmitted: _performSearch,
+          // 搜索框
+          Container(
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: '输入关键词搜索姿势...',
+                hintStyle: TextStyle(
+                  color: Colors.grey[400],
+                  fontSize: 15,
+                ),
+                prefixIcon: const Padding(
+                  padding: EdgeInsets.only(left: 16, right: 8),
+                  child: Icon(
+                    Icons.search_rounded,
+                    color: Color(0xFF9C27B0),
+                    size: 24,
+                  ),
+                ),
+                suffixIcon: Padding(
+                  padding: const EdgeInsets.only(right: 8),
+                  child: GestureDetector(
+                    onTap: () => _performSearch(_searchController.text),
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF9C27B0),
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.arrow_forward_rounded,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                ),
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 12,
+                ),
+              ),
+              onSubmitted: _performSearch,
+            ),
           ),
-          const SizedBox(height: 16),
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _searchResults.isEmpty && _searchController.text.isEmpty
-                    ? const Center(
+                    ? Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(
-                              Icons.search,
-                              size: 80,
-                              color: Colors.grey,
+                            Container(
+                              padding: const EdgeInsets.all(24),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withOpacity(0.6),
+                                shape: BoxShape.circle,
+                              ),
+                              child: Icon(
+                                Icons.search_rounded,
+                                size: 64,
+                                color: Colors.grey[400],
+                              ),
                             ),
-                            SizedBox(height: 24),
+                            const SizedBox(height: 24),
                             Text(
                               '请输入关键词搜索姿势',
-                              style: TextStyle(fontSize: 16, color: Colors.grey),
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.grey[600],
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ],
                         ),
                       )
                     : _searchResults.isEmpty
-                        ? const Center(
+                        ? Center(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Icon(
-                                  Icons.sentiment_dissatisfied,
-                                  size: 80,
-                                  color: Colors.grey,
+                                Container(
+                                  padding: const EdgeInsets.all(24),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withOpacity(0.6),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: Icon(
+                                    Icons.sentiment_dissatisfied_rounded,
+                                    size: 64,
+                                    color: Colors.grey[400],
+                                  ),
                                 ),
-                                SizedBox(height: 24),
+                                const SizedBox(height: 24),
                                 Text(
                                   '没有找到相关姿势',
-                                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.grey[600],
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
                               ],
                             ),

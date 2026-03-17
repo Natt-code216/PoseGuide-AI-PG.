@@ -177,17 +177,6 @@ class _HomeScreenState extends State<HomeScreen> {
           _buildHeader(),
           CustomSearchBar(
             controller: _searchController,
-            onChanged: (value) {
-              setState(() {
-                _searchQuery = value;
-              });
-              // 防抖机制
-              Future.delayed(const Duration(milliseconds: 500), () {
-                if (_searchQuery == value) {
-                  _performSearch(value);
-                }
-              });
-            },
           ),
           CategoryFilter(
             categories: _categories,

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/auth_provider.dart';
 import '../models/pose_model.dart';
 import '../data/mock_poses.dart';
+import 'login_screen.dart';
 
 class UserProfileScreen extends StatefulWidget {
   const UserProfileScreen({super.key});
@@ -35,6 +38,106 @@ class _UserProfileScreenState extends State<UserProfileScreen>
 
   @override
   Widget build(BuildContext context) {
+    return Consumer<AuthProvider>(
+      builder: (context, auth, _) {
+        // 未登录状态
+        if (!auth.isAuthenticated) {
+          return _buildNotLoggedInView();
+        }
+
+        // 已登录状态
+        return _buildLoggedInView(auth);
+      },
+    );
+  }
+
+  /// 未登录视图
+  Widget _buildNotLoggedInView() {
+    return Scaffold(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.deepPurple, Colors.purpleAccent],
+          ),
+        ),
+        child: SafeArea(
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const CircleAvatar(
+                  radius: 60,
+                  backgroundColor: Colors.white24,
+                  child: Icon(
+                    Icons.person,
+                    size: 60,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                const Text(
+                  '登录后可享受更多功能',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  '登录账号同步收藏和历史记录',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Colors.white70,
+                  ),
+                ),
+                const SizedBox(height: 40),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const LoginScreen()),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: Colors.deepPurple,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 48,
+                      vertical: 16,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(30),
+                    ),
+                  ),
+                  child: const Text(
+                    '去登录',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const LoginScreen()),
+                    );
+                  },
+                  child: const Text(
+                    '还没有账号？立即注册',
+                    style: TextStyle(color: Colors.white70),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// 已登录视图
+  Widget _buildLoggedInView(dynamic auth) {
     return Scaffold(
       body: NestedScrollView(
         headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
@@ -76,26 +179,43 @@ class _UserProfileScreenState extends State<UserProfileScreen>
                             CircleAvatar(
                               radius: 50,
                               backgroundColor: Colors.white.withOpacity(0.3),
-                              child: const CircleAvatar(
-                                radius: 46,
-                                backgroundImage: AssetImage(
-                                  'assets/images/h.jpg',
-                                ),
-                              ),
+                              child: auth.currentUser?.avatarUrl != null &&
+                                      auth.currentUser!.avatarUrl.isNotEmpty
+                                  ? ClipOval(
+                                      child: Image.network(
+                                        auth.currentUser!.avatarUrl,
+                                        fit: BoxFit.cover,
+                                        width: 92,
+                                        height: 92,
+                                        errorBuilder:
+                                            (context, error, stackTrace) {
+                                          return const Icon(
+                                            Icons.person,
+                                            size: 40,
+                                            color: Colors.white,
+                                          );
+                                        },
+                                      ),
+                                    )
+                                  : const Icon(
+                                      Icons.person,
+                                      size: 40,
+                                      color: Colors.white,
+                                    ),
                             ),
                             const SizedBox(height: 16),
-                            const Text(
-                              '用户名',
-                              style: TextStyle(
+                            Text(
+                              auth.currentUser?.name ?? '用户名',
+                              style: const TextStyle(
                                 color: Colors.white,
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
                             const SizedBox(height: 8),
-                            const Text(
-                              'pose@example.com',
-                              style: TextStyle(
+                            Text(
+                              auth.currentUser?.email ?? '',
+                              style: const TextStyle(
                                 color: Colors.white70,
                                 fontSize: 14,
                               ),
@@ -134,7 +254,7 @@ class _UserProfileScreenState extends State<UserProfileScreen>
             // History Tab
             _buildTabContent(_history, '还没有浏览历史', '浏览过的姿势会在这里显示'),
             // Settings Tab
-            _buildSettingsContent(),
+            _buildSettingsContent(auth),
           ],
         ),
       ),
@@ -241,7 +361,7 @@ class _UserProfileScreenState extends State<UserProfileScreen>
     );
   }
 
-  Widget _buildSettingsContent() {
+  Widget _buildSettingsContent(dynamic auth) {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -296,11 +416,50 @@ class _UserProfileScreenState extends State<UserProfileScreen>
             textColor: Colors.red,
             iconColor: Colors.red,
             onTap: () {
-              // Handle logout
+              _showLogoutDialog(auth);
             },
           ),
         ),
       ],
+    );
+  }
+
+  void _showLogoutDialog(dynamic auth) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: const Text('确认退出'),
+          content: const Text('确定要退出当前账号吗？'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+              },
+              child: const Text('取消'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                Navigator.of(dialogContext).pop();
+                await auth.logout();
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('已退出登录'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('退出'),
+            ),
+          ],
+        );
+      },
     );
   }
 }
