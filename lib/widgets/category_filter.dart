@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../models/pose_category.dart';
 
@@ -16,12 +17,11 @@ class CategoryFilter extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 50,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: categories.length,
-        separatorBuilder: (context, index) => const SizedBox(width: 8),
+        separatorBuilder: (context, index) => const SizedBox(width: 12),
         itemBuilder: (context, index) {
           final category = categories[index];
           bool isSelected = selectedCategoryId == category.id;
@@ -30,30 +30,46 @@ class CategoryFilter extends StatelessWidget {
             onTap: () {
               onCategorySelected(isSelected ? null : category.id);
             },
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
               decoration: BoxDecoration(
-                color: isSelected ? Colors.deepPurple : Colors.white,
+                color: isSelected ? null : Colors.white.withOpacity(0.5),
                 borderRadius: BorderRadius.circular(20),
                 border: Border.all(
-                  color: isSelected ? Colors.deepPurple : Colors.grey[300]!,
+                  color: isSelected
+                      ? Colors.white.withOpacity(0.9)
+                      : Colors.white.withOpacity(0.6),
+                  width: 1.5,
                 ),
                 boxShadow: isSelected
-                    ? null
+                    ? [
+                        BoxShadow(
+                          color: const Color(0xFF6C63FF).withOpacity(0.2),
+                          blurRadius: 16,
+                          offset: const Offset(0, 4),
+                        ),
+                        BoxShadow(
+                          color: Colors.white.withOpacity(0.4),
+                          blurRadius: 8,
+                          spreadRadius: 1,
+                        ),
+                      ]
                     : [
                         BoxShadow(
                           color: Colors.black.withOpacity(0.05),
-                          blurRadius: 4,
+                          blurRadius: 8,
                           offset: const Offset(0, 2),
                         ),
                       ],
               ),
               child: Center(
                 child: Text(
-                  '${category.icon} ${category.name}',
+                  '${category.icon}  ${category.name}',
                   style: TextStyle(
-                    color: isSelected ? Colors.white : Colors.black87,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    color: isSelected ? const Color(0xFF6C63FF) : const Color(0xFF555555),
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                    fontSize: 13,
                   ),
                 ),
               ),

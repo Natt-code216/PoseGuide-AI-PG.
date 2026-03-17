@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/pose_model.dart';
 import '../models/pose_category.dart';
 import '../services/pose_service.dart';
-import '../widgets/pose_grid_item.dart';
+import '../widgets/pose_card.dart';
 import '../widgets/custom_search_bar.dart';
 import '../widgets/category_filter.dart';
 import 'user_profile_screen.dart';
@@ -105,22 +105,24 @@ class _HomeScreenState extends State<HomeScreen> {
           // Logo
           Expanded(
             child: RichText(
-              text: const TextSpan(
+              text: TextSpan(
                 children: [
-                  TextSpan(
+                  const TextSpan(
                     text: 'PG. ',
                     style: TextStyle(
                       fontSize: 24,
-                      fontWeight: FontWeight.bold,
+                      fontWeight: FontWeight.w800,
                       color: Colors.black87,
                       fontStyle: FontStyle.italic,
+                      letterSpacing: -0.5,
                     ),
                   ),
                   TextSpan(
                     text: '灵感快门',
                     style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.grey,
+                      fontSize: 16,
+                      color: Colors.grey[600],
+                      fontWeight: FontWeight.w400,
                     ),
                   ),
                 ],
@@ -136,15 +138,24 @@ class _HomeScreenState extends State<HomeScreen> {
               );
             },
             child: Container(
-              padding: const EdgeInsets.all(8),
+              padding: const EdgeInsets.all(2),
               decoration: BoxDecoration(
-                color: Colors.grey[100],
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFE1BEE7), Color(0xFFCE93D8)],
+                ),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
-                Icons.person,
-                size: 24,
-                color: Colors.black87,
+              child: Container(
+                padding: const EdgeInsets.all(6),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.person,
+                  size: 20,
+                  color: Colors.black87,
+                ),
               ),
             ),
           ),
@@ -156,6 +167,11 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const LinearGradient(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: [Color(0xFFF3E5F5), Color(0xFFE1BEE7)],
+      ).colors[0],
       body: Column(
         children: [
           _buildHeader(),
@@ -165,7 +181,7 @@ class _HomeScreenState extends State<HomeScreen> {
               setState(() {
                 _searchQuery = value;
               });
-              // 添加防抖机制，避免频繁搜索
+              // 防抖机制
               Future.delayed(const Duration(milliseconds: 500), () {
                 if (_searchQuery == value) {
                   _performSearch(value);
@@ -182,37 +198,39 @@ class _HomeScreenState extends State<HomeScreen> {
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
                 : _poses.isEmpty
-                    ? const Center(
+                    ? Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(
                               Icons.sentiment_dissatisfied,
                               size: 64,
-                              color: Colors.grey,
+                              color: Colors.grey[400],
                             ),
-                            SizedBox(height: 16),
+                            const SizedBox(height: 16),
                             Text(
                               '没有找到相关姿势',
-                              style: TextStyle(fontSize: 16, color: Colors.grey),
+                              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
                             ),
                           ],
                         ),
                       )
                     : RefreshIndicator(
                         onRefresh: _loadInitialData,
-                        child: GridView.builder(
+                        child: Padding(
                           padding: const EdgeInsets.all(8.0),
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 2,
-                            crossAxisSpacing: 8,
-                            mainAxisSpacing: 8,
-                            childAspectRatio: 0.75,
+                          child: GridView.builder(
+                            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 8,
+                              mainAxisSpacing: 8,
+                              childAspectRatio: 0.75,
+                            ),
+                            itemCount: _poses.length,
+                            itemBuilder: (context, index) {
+                              return PoseCard(pose: _poses[index]);
+                            },
                           ),
-                          itemCount: _poses.length,
-                          itemBuilder: (context, index) {
-                            return PoseGridItem(pose: _poses[index]);
-                          },
                         ),
                       ),
           ),

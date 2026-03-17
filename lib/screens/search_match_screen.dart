@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/pose_model.dart';
 import '../services/pose_service.dart';
-import '../widgets/pose_grid_item.dart';
+import '../widgets/pose_card.dart';
 import '../widgets/custom_search_bar.dart';
 
 class SearchMatchScreen extends StatefulWidget {
@@ -134,7 +134,7 @@ class _SearchMatchScreenState extends State<SearchMatchScreen> {
                               ),
                               itemCount: _searchResults.length,
                               itemBuilder: (context, index) {
-                                return PoseGridItem(pose: _searchResults[index]);
+                                return PoseCard(pose: _searchResults[index]);
                               },
                             ),
                           ),
